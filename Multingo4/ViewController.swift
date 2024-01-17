@@ -1,33 +1,85 @@
 import UIKit
 
-
 class ViewController: UIViewController {
-
-    //MARK: - IB Outlets
+    
+//MARK: - IB Outlets
     @IBOutlet var firstTranslationOutput: UITextView!
     @IBOutlet var secondTranslationOutput: UITextView!
     @IBOutlet var thirdTranslationOutput: UITextView!
-    
     @IBOutlet var inputTranslationBox: UITextView!
     
-   
+//MARK: - Instance Properties
+    // Added variables to track the active container tag and selected languages
+    var activeContainerTag: Int?
+    var selectedLanguages: [Int: String] = [:]
+    
+    let availableLanguages = ["es", "fr", "ht", "de", "it", "zh", "pt"]
+    
+    // Dictionary to map language abbreviations with their full names
+    let languageMapping: [String: String] = [
+        "es": "Spanish",
+        "fr": "French",
+        "ht": "Haitian Creole",
+        "de": "German",
+        "it": "Italian",
+        "zh": "Chinese",
+        "pt": "Portuguese"
+    ]
+    
+//MARK: - VDL
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-
     
+//MARK: - IB ACTIONS
     @IBAction func translateButtonPressed(_ sender: UIButton) {
-       
+        
         // To handle an empty input
         guard let inputText = inputTranslationBox.text, !inputText.isEmpty else {
             return
         }
-
-        let targetLanguages = ["es", "fr", "ht"]
-
+        
+        // Get the target languages for each container
+        let targetLanguages: [String] = [
+            selectedLanguages[1] ?? "",
+            selectedLanguages[2] ?? "",
+            selectedLanguages[3] ?? ""
+        ]
+        
         translateTexts(text: inputText, targetLanguages: targetLanguages)
     }
-
+    
+    // Function to change languages via UIAlertController for each button
+    @IBAction func changeLanguageButtonPressed(_ sender: UIButton) {
+        let alertController = UIAlertController(title: "Select Language", message: nil, preferredStyle: .actionSheet)
+        
+        for languageAbbreviation in availableLanguages {
+            if let languageFullName = languageMapping[languageAbbreviation] {
+                let action = UIAlertAction(title: languageFullName, style: .default) { [weak self] _ in
+                    self?.didSelectLanguage(languageAbbreviation, forContainerWithTag: sender.tag)
+                    
+                    // Updates the button title with the selected language
+                    sender.setTitle(languageFullName, for: .normal)
+                }
+                alertController.addAction(action)
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    // MARK: - INSTANCE METHODS
+    // Update the selectedLanguages dictionary with the selected language for the specific container
+    func didSelectLanguage(_ language: String, forContainerWithTag tag: Int) {
+        selectedLanguages[tag] = language
+        
+        // You can perform additional actions, such as updating translations
+        translateTexts(text: inputTranslationBox.text, targetLanguages: Array(selectedLanguages.values))
+    }
+    
     func translateTexts(text: String, targetLanguages: [String]) {
         // Clear previous translations
         firstTranslationOutput.text = ""
@@ -36,8 +88,8 @@ class ViewController: UIViewController {
         
         // Iterate through target languages and index them
         for (index, targetLanguage) in targetLanguages.enumerated() {
-           
-        // Select the appropriate UITextView based on the index
+            
+            // Select the appropriate UITextView based on the index
             var currentTextView: UITextView
             switch index {
             case 0:
@@ -55,9 +107,8 @@ class ViewController: UIViewController {
             translateText(textToTranslate: text, targetLanguage: targetLanguage, textView: currentTextView)
         }
     }
-
-        
-// Translation logic
+    
+    // Translation logic
     func translateText(textToTranslate: String, targetLanguage: String, textView: UITextView) {
         let apiKey = "AIzaSyDSUgVp8M7dBql7rdEXZJ7ibETMpllqoL8"
         let encodedText = textToTranslate.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
@@ -84,283 +135,93 @@ class ViewController: UIViewController {
                    let translation = translatedText.first?["translatedText"] as? String {
 
                     DispatchQueue.main.async {
-                       
-                        // Decode HTML entities
-                        do {
-                            let decodedString = try NSAttributedString(data: translation.data(using: .utf8) ?? Data(), options: [.documentType: NSAttributedString.DocumentType.html], documentAttributes: nil).string
-                            textView.text = decodedString
-                        } catch {
-                            print("Error decoding HTML entities: \(error)")
-                        }
+                        textView.text = translation.removingPercentEncoding ?? translation
                     }
                 }
             } catch {
                 print("Error decoding JSON: \(error)")
             }
         }
-
         task.resume()
     }
+
+    // To show language selection alert
+    func showLanguageSelectionAlert() {
+        let alertController = UIAlertController(title: "Select Language", message: nil, preferredStyle: .actionSheet)
+        
+        // Array of available languages
+        let availableLanguages = ["Spanish", "French", "Haitian Creole", "German"]
+        
+        // Create actions for each language
+        for (index, language) in availableLanguages.enumerated() {
+            let action = UIAlertAction(title: language, style: .default) { [weak self] _ in
+                // Handle language selection
+                self?.handleLanguageSelection(index)
+            }
+            alertController.addAction(action)
+        }
+        // Added cancel action
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        
+        // Present the alert
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    // To handle language selection
+    func handleLanguageSelection(_ selectedLanguageIndex: Int) {
+        guard let activeContainerTag = activeContainerTag else {
+            return
+        }
+        
+        // Array of available languages
+        let availableLanguages = ["Spanish", "French", "Haitian Creole", "German"] // Add more languages as needed
+        
+        // Get the selected language
+        let selectedLanguage = availableLanguages[selectedLanguageIndex]
+        
+        // Update the selected language for the active container
+        selectedLanguages[activeContainerTag] = selectedLanguage
+        
+        // Update the UI based on the selected language
+        updateUITranslationForContainer(tag: activeContainerTag, language: selectedLanguage)
+    }
+    
+    // Add the updateUITranslationForContainer method
+    func updateUITranslationForContainer(tag: Int, language: String) {
+        // Perform translation or update UI elements based on the selected language
+        switch tag {
+        case 1:
+            // Update UI elements for the first container
+            // Example: translateTexts(text: inputTranslationBox.text, targetLanguages: [language])
+            firstTranslationOutput.text = language
+        case 2:
+            // Update UI elements for the second container
+            secondTranslationOutput.text = language
+        case 3:
+            // Update UI elements for the third container
+            thirdTranslationOutput.text = language
+        default:
+            break
+        }
+    }
+    
 }
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-
-            
-//            for (index, targetLanguage) in targetLanguages.enumerated() {
-//                guard let url = buildTranslationURL(text: text, targetLanguage: targetLanguage) else {
-//                    // Handle URL construction error
-//                    continue
-//                }
-//
-//                // Make HTTP request
-//                URLSession.shared.dataTask(with: url) { (data, response, error) in
-//                    if let error = error {
-//                        // Handle HTTP request error
-//                        print("Translation error: \(error.localizedDescription)")
-//                        return
-//                    }
-//
-//                    if let data = data,
-//                       let translation = String(data: data, encoding: .utf8) {
-//                        // Process and update the respective text view
-//                        DispatchQueue.main.async {
-//                            switch index {
-//                            case 0:
-//                                self.firstTranslationOutput.text = "\(targetLanguage.uppercased()): \(translation)"
-//                            case 1:
-//                                self.secondTranslationOutput.text = "\(targetLanguage.uppercased()): \(translation)"
-//                            case 2:
-//                                self.thirdTranslationOutput.text = "\(targetLanguage.uppercased()): \(translation)"
-//                            default:
-//                                break
-//                            }
-//                        }
-//                    }
-//                }.resume()
-//            }
-//        }
-//
-//        func buildTranslationURL(text: String, targetLanguage: String) -> URL? {
-//            // Construct URL for translation API (replace with your actual API endpoint)
-//            let baseURL = "https://translation-api.example.com/translate"
-//            let apiKeyQueryParam = "apiKey=\(apiKey)"
-//            let textQueryParam = "text=\(text)"
-//            let targetLanguageQueryParam = "targetLanguage=\(targetLanguage)"
-//
-//            let urlString = "\(baseURL)?\(apiKeyQueryParam)&\(textQueryParam)&\(targetLanguageQueryParam)"
-//
-//            return URL(string: urlString)
-//        }
-//    }
+extension String {
+        var htmlDecoded: String {
+            let decoded = try? NSAttributedString(data: Data(utf8), options: [
+                .documentType: NSAttributedString.DocumentType.html,
+                .characterEncoding: String.Encoding.utf8.rawValue
+            ], documentAttributes: nil).string
+            return decoded ?? self
+        }
+    }
 
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-////MARK: - INSTANCE PROPERTIES
-//    var translationBoxes: [UITextView] = []
-//    var selectedLanguage: String = ""
-//
-//    
-////MARK: - VDL
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//    }
-//        
-////MARK: - IB ACTIONS
-//    @IBAction func translateButtonPressed(_ sender: Any) {
-//        let textToTranslate = inputTranslationBox.text ?? " "
-//        let targetLanguage = "fr"
-//        
-//        // Use the first available translation box
-//            guard let targetTextView = translationBoxes.first else { return }
-//        
-//        translateText(textToTranslate: textToTranslate, targetLanguage: targetLanguage, textView: targetTextView)
-//    }
-//    
-//    @IBAction func addLanguageButtonPressed(_ sender: Any) {
-////        showLanguagePicker()
-////        addTranslationBox()
-//    }
-//     
-////MARK: - INSTANCE METHODS
-//    
-//    // Translation logic
-//    func translateText(textToTranslate: String, targetLanguage: String, textView: UITextView) {
-//
-//            let apiKey = "AIzaSyDSUgVp8M7dBql7rdEXZJ7ibETMpllqoL8"
-//            let url = URL(string: "https://translation.googleapis.com/language/translate/v2?key=\(apiKey)&q=\(textToTranslate)&target=\(targetLanguage)")!
-//
-//            var request = URLRequest(url: url)
-//            request.httpMethod = "POST"
-//
-//            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//                if let error = error {
-//                    print("Error: \(error)")
-//                    return
-//                }
-//                guard let data = data else {
-//                    print("No data received.")
-//                    return
-//                }
-//                do {
-//                    let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-//
-//                    if let translations = json?["data"] as? [String: Any],
-//                        let translatedText = translations["translations"] as? [[String: Any]],
-//                        let translation = translatedText.first?["translatedText"] as? String {
-//
-//                        DispatchQueue.main.async {
-//                            // Update the text view with the translated text
-//                            textView.text = translation
-//                        }
-//                    }
-//                } catch {
-//                    print("Error decoding JSON: \(error)")
-//                }
-//            }
-//
-//            task.resume()
-//        }
-//    }
-
-//    func showLanguagePicker() {
-//        let languagePicker = UIAlertController(title: "Select Language", message: nil, preferredStyle: .actionSheet)
-//        languagePicker.modalPresentationStyle = .popover
-//
-//        let pickerView = UIPickerView()
-//        pickerView.delegate = self
-//        pickerView.dataSource = self
-//        languagePicker.view.addSubview(pickerView)
-//
-//        let selectAction = UIAlertAction(title: "Select", style: .default) { [weak self] _ in
-//        }
-//
-//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-//
-//        languagePicker.addAction(selectAction)
-//        languagePicker.addAction(cancelAction)
-//
-//        if let popoverController = languagePicker.popoverPresentationController {
-//            popoverController.sourceView = addLanguageButton
-//            popoverController.sourceRect = addLanguageButton.bounds
-//        }
-//
-//        present(languagePicker, animated: true, completion: nil)
-//    }
-//    
-    
-//// the constraints for the new translation box
-//    func addTranslationBox() {
-//        let newTranslationBox = UITextView()
-//        newTranslationBox.translatesAutoresizingMaskIntoConstraints = false
-//        newTranslationBox.heightAnchor.constraint(equalToConstant: 100).isActive = true
-//        newTranslationBox.backgroundColor = .lightGray
-//        
-//// Adds the new translation box to the stack view
-//    translationStackView.addArrangedSubview(newTranslationBox)
-//
-//// Perform translation for the new language
-//        if let selectedLanguage = selectedLanguage {
-//        translateText(textToTranslate: inputTranslationBox, targetLanguage: selectedLanguage, textView: newTranslationBox)
-//        }
-//        
-//            // Save the new translation box to the array for future reference
-//            translationBoxes.append(newTranslationBox)
-//
-//}
-//           
-//extension ViewController: UIPickerViewDelegate, UIPickerViewDataSource {
-//    var languages: [String] {
-//        // Add the languages you want to support in the picker
-//        return ["fr", "es", "ht", "de", ]
-//    }
-//
-//    var selectedLanguage: String {
-//        return languages.first ?? ""
-//    }
-//
-//    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-//        return 1
-//    }
-//
-//    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-//        return languages.count
-//    }
-//
-//    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-//        return languages[row]
-//    }
-//
-//    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-//        // Handle language selection if needed
-//        // ...
-//    }
-//}
-//
-
-
+// fix encoding issues
+// rearrange buttons
+// add the change lang func to the other two boxes
+// add the changeLang button to the inputbox
 
 

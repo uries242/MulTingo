@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6AA85ABE2B5332B0009E6655 /* LanguageSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA85ABD2B5332B0009E6655 /* LanguageSelectionViewController.swift */; };
+		6AA85AC02B53A3DC009E6655 /* TranslatorLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AA85ABF2B53A3DC009E6655 /* TranslatorLogic.swift */; };
 		6AE3A5F02B4DD83800B30E10 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE3A5EF2B4DD83800B30E10 /* AppDelegate.swift */; };
 		6AE3A5F22B4DD83800B30E10 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE3A5F12B4DD83800B30E10 /* SceneDelegate.swift */; };
 		6AE3A5F42B4DD83800B30E10 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE3A5F32B4DD83800B30E10 /* ViewController.swift */; };
@@ -16,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6AA85ABD2B5332B0009E6655 /* LanguageSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionViewController.swift; sourceTree = "<group>"; };
+		6AA85ABF2B53A3DC009E6655 /* TranslatorLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslatorLogic.swift; sourceTree = "<group>"; };
 		6AE3A5EC2B4DD83800B30E10 /* Multingo4.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Multingo4.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AE3A5EF2B4DD83800B30E10 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6AE3A5F12B4DD83800B30E10 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -58,6 +62,8 @@
 			children = (
 				6AE3A5EF2B4DD83800B30E10 /* AppDelegate.swift */,
 				6AE3A5F12B4DD83800B30E10 /* SceneDelegate.swift */,
+				6AA85ABF2B53A3DC009E6655 /* TranslatorLogic.swift */,
+				6AA85ABD2B5332B0009E6655 /* LanguageSelectionViewController.swift */,
 				6AE3A5F32B4DD83800B30E10 /* ViewController.swift */,
 				6AE3A5F52B4DD83800B30E10 /* Main.storyboard */,
 				6AE3A5F82B4DD84100B30E10 /* Assets.xcassets */,
@@ -139,6 +145,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				6AE3A5F42B4DD83800B30E10 /* ViewController.swift in Sources */,
+				6AA85ABE2B5332B0009E6655 /* LanguageSelectionViewController.swift in Sources */,
+				6AA85AC02B53A3DC009E6655 /* TranslatorLogic.swift in Sources */,
 				6AE3A5F02B4DD83800B30E10 /* AppDelegate.swift in Sources */,
 				6AE3A5F22B4DD83800B30E10 /* SceneDelegate.swift in Sources */,
 			);
